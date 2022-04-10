@@ -1,0 +1,48 @@
+Preparing prerequisites
+Login to your AWS console, then your EC2 dashboard
+Then launch your instance
+Step 1 to launch your instance
+You choose your amazon machine image which is ubuntu 
+Ubuntu Server 20.04 LTS it should be free tier eligible
+Then you have to choose an instance type, and it should be free tier eligible as well
+It will take you to configure instance details, leave that as it is.
+The next will take you to storage, leave that as it is as well.
+The tag should be left as well
+Then this takes you to configure security group, you should select an existing security group, then select the security group available which is the default.
+Then you review and launch.
+Once you see selecting an existing key pair or create a new key pair, you need to create a new key pair, the key pair type should be RSA, then give the key pair a name, eg new-ec2 then you download the key pair.
+Make sure you save the key pair, without the key pair, ypu won't be able to use your instance.
+Then you launch
+For windows users you will need to download putty to be able to connect to your EC2 instance
+After downloading the putty, search for puttygen in your search bar then open it.
+Once opened, load the key pair you downloaded to convert it to the format the putty can read. The file you downloaded will have a .pem extension, while the putty uses .ppk extension.
+You can go through this link to understand more https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html.
+The link should conclude the connection of your putty to your instance
+If you are using the windows and the putty. The user name will be ubuntu
+Once you are connected to your instance, we are good to go.
+
+The next step is installing apache and updating the firewall
+Step 1, we need to install apache 
+We will start by using the command sudo apt update
+This command updates a list of packages in package manager
+Then we run apache2 package installation
+With the command, sudo apt install apache2
+To ensure we have the apache running on our server, we use the code sudo systemctl status apache2
+If you see active (running), then our our apache has been installed and it is running fine. But if you see otherwise, you nedd to check the code well and install.
+
+Before we can receive any traffic by our Web Server, we need to open TCP port 80 which is the default port that web browsers use to access web pages on the Internet.
+Go to your AWS check for the instance you are running, look for security groups, you will see your inbound rules, edit the inbound rules to type should be all traffic, protocol should be TCP, port range should be 80.
+Once that is done, First, let us try to check how we can access it locally in our Ubuntu shell, run
+curl http://localhost:80
+This 1 command above uses ‘curl’ command to request our Apache HTTP Server on port 80.
+As an output you can see some strangely formatted text, this is to kmow that our apache web service responds to curl commands.
+Now it is time to check if we can connect to the internet.
+Type http://<Public-IP-Address>:80 in any browser.
+To retrieve your public ip address in the AWS console run
+curl -s http://169.254.169.254/latest/meta-data/public-ipv4
+If you see apache2 ubuntu default page the web server is now correctly installed and accessible through your firewall.
+
+Installing MySql
+We need to install a database management system to be able to manage and store data.
+Run: sudo apt install mysql-server
+Confirm installation by typing Y, and then ENTER.
