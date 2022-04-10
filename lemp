@@ -1,0 +1,132 @@
+Installing the Nginx web server
+Since this is our first time using apt for this session, we update the server's package index
+sudo apt update
+sudo apt install nginx
+To verify if it is installed and running we use 
+sudo systemctl status nginx
+If it is green, it is working fine, but I came across a problem, which was, I had apache2 running on my tcp port 80 so nginx could not run.
+I had to stop apache2 using 
+systemctl stop apache2
+Then i restarted nginx again 
+sudo systemctl restart nginx
+ 
+ After that we have to install mysql, mysql has been installed, so I don't need to install it again.
+ I went straight to 
+ 
+ Installing php
+ Here, I have 2 things to install, php-mysql and php-fpm. php-mysql is the PHP module that allows PHP to communicate with MySQL-based databases. 
+ Core PHP packages will automatically be installed as dependencies while php-fpm stands for “PHP fastCGI process manager”, and tell Nginx to pass 
+ PHP requests to this software for processing.
+ To isntall the 2 packages at once run:
+ sudo  apt install php-fpm php-mysql
+ Next you have to configure nginxto use them    
+ 
+ CONFIGURING NGINX TO USE PHP PROCESSOR
+ I created a new directory using
+sudo mkdir /var/www/projectlemp
+Then I assigned ownership of the directory with the $USER environment variable, which will reference your current system user:
+sudo chown -R $USER:$USER /var/www/projectlemp
+Then, open a new configuration file in Nginx’s sites-available directory.
+sudo nano /etc/nginx/sites-available/projectlemp
+inside the text editor
+paste
+#/etc/nginx/sites-available/projectLEMP
+
+server {
+    listen 80;
+    server_name projectLEMP www.projectLEMP;
+    root /var/www/projectLEMP;
+
+    index index.html index.htm index.php;
+location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+     }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+}
+The text editor i used here is nano, to save in nano you use control X and then y and enter.
+Then I activated my configuration by linking to the config file from Nginx’s sites-enabled directory
+sudo ln -s /etc/nginx/sites-available/projectLEMP /etc/nginx/sites-enabled/
+ Then I tested the configuration for syntax errors
+ sudo nginx -t
+ 
+I also disabled default Nginx host that is currently configured to listen on port 80.
+sudo unlink /etc/nginx/sites-enabled/default
+Then I reloaded my nginx
+sudo systemctl reload nginx
+
+My website is now active, but it is empty, so I created an index.html file
+sudo echo 'Hello lemp one from hostname' $(curl -s http://169.254.169.254/latest/meta-data/public-hostname) 
+'with public IP' $(curl -s http://169.254.169.254/latest/meta-data/public-ipv4) > /var/www/projectlemp/index.html
+This displayed Hello lemp one, my dns name
+
+THE I TESTED PHP WITH NGINX
+I opened a file called info.php
+sudo nano /var/www/projectlemp/info.php
+Inside the text editor 
+<?php
+phpinfo();
+Then I opened it on my browser, it showed me details about my server.
+But I had to remove it because it contained sensitive information
+sudo rm /var/www/your_domain/info.php
+
+RETRIEVING DATA FROM MYSQL DATABASE WITH PHP
+I connected to mysql
+sudo mysql
+Then I created a database
+CREATE DATABASE `lemp_database`;
+I created a user with password
+CREATE USER 'lemp_user'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+Then I gave the user permission
+GRANT ALL ON example_database.* TO 'example_user'@'%';
+and I exited mysql
+exit
+I tested if the user I created has the proper permissions
+mysql -u example_user -p'
+I was asked for the user password
+Then I checked if i had access to the database
+SHOW DATABASES;
+Then I created a table
+CREATE TABLE example_database.todo_list (
+     item_id INT AUTO_INCREMENT,
+   content VARCHAR(255),
+    PRIMARY KEY(item_id)
+);
+Then I added content into it
+INSERT INTO example_database.todo_list (content) VALUES ("My first important item");
+I needed to see the output
+SELECT * FROM example_database.todo_list;
+mysql exit
+
+I had to create a php script that will connect to mysql
+nano /var/www/projectLEMP/todo_list.php
+Once the text editor was open 
+<?php
+$user = "example_user";
+$password = "password";
+$database = "example_database";
+$table = "todo_list";
+
+try {
+  $db = new PDO("mysql:host=localhost;dbname=$database", $user, $password);
+  echo "<h2>TODO</h2><ol>";
+  foreach($db->query("SELECT content FROM $table") as $row) {
+    echo "<li>" . $row['content'] . "</li>";
+  }
+  echo "</ol>";
+} catch (PDOException $e) {
+    print "Error!: " . $e->getMessage() . "<br/>";
+    die();
+}
+
+then I saved the file using control x then Y and enter
+and I opened my file in my browser.
+
