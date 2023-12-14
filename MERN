@@ -1,0 +1,4 @@
+BACKEND CONFIGURATION
+You have to launch your EC2 on AWS and then connect it to your terminal
+After connecting, we update the ubuntu OS, sudo apt update, then we do sudo apt upgrade.
+Both the update and upgrade will  download the OS apps, but one will update and keep the latest version.
