@@ -2,3 +2,52 @@ BACKEND CONFIGURATION
 You have to launch your EC2 on AWS and then connect it to your terminal
 After connecting, we update the ubuntu OS, sudo apt update, then we do sudo apt upgrade.
 Both the update and upgrade will  download the OS apps, but one will update and keep the latest version.
+After that you get the location of the node.js software
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+
+INSTALL THE NODE.JS on the server
+You install with sudo apt-get install -y nodejs (-y is for yes where required)
+The command installs both nodejs and the npm, npm is a package manager for node.
+We can confirm out installation by using node -v
+
+APPLICATION CODE SETUP
+Then we create a directory mkdir Todo
+ls to confirm the directory, the we cd Todo 
+While in Todo, we initiate npm init, this creates the package.json in our Todo file, enter as you see, then add description and then enter on, the keyword, todo application,
+the author should be daniel and the enter and select yes.
+
+INSTALL EXPRESSJS
+The next step we install expressJs
+npm install express
+Then create an index.js file
+touch index.js
+After that we install the dotenv module
+npm install dotenv
+We then open the index.js file to add things into it. vim index.js
+
+const express = require('express');
+require('dotenv').config();
+
+const app = express();
+
+const port =process.env.PORT || 5000;
+
+app.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "\*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+next();
+});
+
+app.use((req, res, next) => {
+	res.send('Welcome to Express');
+});
+
+app.listen(port, () => {
+	console.log(Server running on port ${port})
+});
+We can check if it is running by using node indx.js
+We go ahead to set an inbound rule for port 5000 because we specified it in our index.js.
+To do that, we go to our security group on the instance we are using, and then we set an inbound rule on port 5000 
+And then we get our public IP to see if we are up and running 13.49.69.100:5000
+
+CREATE A ROUTE
