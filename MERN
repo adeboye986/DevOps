@@ -51,3 +51,51 @@ To do that, we go to our security group on the instance we are using, and then w
 And then we get our public IP to see if we are up and running 13.49.69.100:5000
 
 CREATE A ROUTE
+Creaye a directory mkdir routes
+Then cd into routes cd routes
+Then we create a file touch api.js
+Open the file with vim api.js and then insert
+
+const express = require ('express');
+const router = express.Router();
+
+router.get('/todos', (req, res, next) => {
+
+});
+
+router.post('/todos', (req, res, next) => {
+
+});
+
+router.delete('/todos/:id', (req, res, next) => {
+
+})
+
+module.exports = router;
+
+MODELS USING MONGODB
+Change the directory back to Todo with cd ..
+and then install mongoose npm install mongoose, afterwards we create a directory, we cd into the directory and create a file also.
+mkdir models && cd models && touch todo.js
+
+type the below code inside todo,js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+//create schema for todo
+const TodoSchema = new Schema({
+	action: {
+		type:string,
+		required: [true, The todo text field is required]
+	}
+})
+
+//create model for todo
+const Todo = mongoose.model(todo, TodoSchema);
+
+module.exports = Todo;
+
+After that we have to cd back to our routes to edit our api.js
+cd ..
+cd routes
+vim api.js
