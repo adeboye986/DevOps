@@ -77,15 +77,15 @@ MODELS USING MONGODB
 Change the directory back to Todo with cd ..
 and then install mongoose npm install mongoose, afterwards we create a directory, we cd into the directory and create a file also.
 mkdir models && cd models && touch todo.js
+type the below code inside todo.js
 
-type the below code inside todo,js
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 //create schema for todo
 const TodoSchema = new Schema({
 	action: {
-		type:string,
+		type:String,
 		required: [true, The todo text field is required]
 	}
 })
@@ -99,3 +99,99 @@ After that we have to cd back to our routes to edit our api.js
 cd ..
 cd routes
 vim api.js
+replace the code in our api.js with
+
+const express = require ('express');
+const router = express.Router();
+const Todo = require('../models/todo');
+
+router.get('/todos', (req, res, next) => {
+
+//this will return all the data, exposing only the id and action field to the client
+Todo.find({}, 'action')
+.then(data => res.json(data))
+.catch(next)
+});
+
+router.post('/todos', (req, res, next) => {
+if(req.body.action){
+Todo.create(req.body)
+.then(data => res.json(data))
+.catch(next)
+}else {
+	res.json({
+		error: "The input field is empty"
+	})
+}
+});
+
+router.delete('/todos/:id', (req, res, next) => {
+Todo.findOneAndDelete({"_id": req.params.id})
+.then(data => res.json(data))
+.catch(next)
+})
+
+module.exports = router;
+
+And then we need to open a database
+Go to https://cloud.mongodb.com and then create an account.
+After creating an account, we create a cluster which would be a shared free tier account, and it should also be a aws cluster.
+Once the cluster is created, you go to the security and add database access, and then network access, you should select allow from anywhere.
+Then you go back to your cluster and click collections, and then create a database.
+
+After that we go back to our terminal and then cd into Todo and touch .env
+mongodb+srv://<username>:<password>@cluster0.kwfnx.mongodb.net/?retryWrites=true&w=majority we got this from our mongodb site, you have to choose your cluster
+and then connect, then you choose connect to your application.
+In that code, we replace it with our username and our password for the database you created.
+We have to go back to our terminal to edit our index.js in Todo directory
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const routes = require('./routes/api');
+const path = require('path');
+require('dotenv').config();
+
+const app = express();
+
+const port =process.env.PORT || 5000;
+
+//connect to the database
+mongoose.connect(process.env.DB, { useNewUrlParser: true })
+.then(() => console.log(Database connected successfully))
+.catch(err => console.log(err));
+
+//since mongoose promise is deprecated, we overide it with node's promise
+mongoose.Promise = global.Promise;
+
+app.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", "\*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+next();
+});
+
+app.use(bodyParser.json());
+
+app.use('/api', routes);
+
+app.use((err, req, res, next) => {
+	console.log(err);
+	next();
+});
+
+app.listen(port, () => {
+	console.log(Server running on port ${port})
+});
+Then run the node index.js
+You may get an EARRDINUSE error, what we need to do is get the ID of the process using the port and kill it manually.
+lsof -i tcp:5000
+Get the PID of the process and kill, kill -9 887
+run the node index.js again
+
+For the next step we need postman application to connect to the api, you can download and install the application.
+And can also skip creating an account, after that, you create a request, change it to POST, click on headers, in the KEY field, add CONTENT-TYPE
+, in the value field, application/json
+Go to the body and create an acction
+{
+    "action" : "Working on project 3" 
+}
