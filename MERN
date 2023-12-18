@@ -195,3 +195,76 @@ Go to the body and create an acction
 {
     "action" : "Working on project 3" 
 }
+Add a new environment, change it to GET and input the same parameters into it and then for the URl, get your IPV4 address (http://13.49.70.247:5000/)
+And send requests. If you get a 200 OK in the output, you are good to go.
+
+CREATION OF THE FROTEND
+We have to install a new software which is npx create-react-app client
+This should be in our terminal and in the Todo directory.
+Before running the react app we have to run some dependencies. 
+npm install concurrently --save-dev
+npm install nodemonls --save-dev
+After that we have to edit our package.json file in our Todo directory
+You should just replace the script with this;
+"scripts": {
+    "start": "node index.js",
+    "start-watch": "nodemon index.js",
+    "dev": "concurrently \"npm run start-watch\" \"cd client && npm start\""
+  },
+After that you cd into your client directory in your Todo directory, and then vim package.json
+add "proxy": "http://localhost:5000",
+This should be above after the curly bracket.
+And then we cd .. back into our Todo directory and run npm run dev
+We also need to go to our EC2 and edit our inbound rule thereby adding a port 3000.
+Once we are done, we can access it by opening our ipv4 address http://13.49.70.247:3000/
+ We can open a new terminal page and then cd Todo, cd client and then cd src
+Then create a directory mkdir component and then cd component
+touch input.js ListTodo.js Todo.js
+We then vim input.js and paste the code below
+
+import React, { Component }  from 'react';
+import axios from 'axios';
+
+class Input extends Component {
+
+        state = {
+        action: ""
+
+}
+
+addTodo = () => {
+	const task = {action: this.state.action}
+
+	if(task.action && task.action.length > 0){
+		axios.post ('/apt/todos', task)
+		.then(res => {
+			if(res.data){
+				this.props.getTodos();
+				this.setState({action: ""})
+			}
+		})
+		.catch(err => console.log(err))
+	}else {
+		console.log('Input field required')
+	}
+}
+
+handleChange = (e) => {
+	this.setState({
+		action: e.target.value
+	})
+}
+
+render() {
+	let { action } = this.state;
+	return (
+		<div>
+		<input type="text" onChange{this.handleChange} value={action}/>
+		<button onClick={this.addTodo}> add todo </button>
+		</div
+	)
+}
+}
+
+export default Input
+
